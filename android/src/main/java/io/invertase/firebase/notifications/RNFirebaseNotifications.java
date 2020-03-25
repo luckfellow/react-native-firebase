@@ -1,6 +1,7 @@
 package io.invertase.firebase.notifications;
 
 import android.app.Activity;
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.RemoteInput;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.service.notification.StatusBarNotification;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -108,6 +110,16 @@ public class RNFirebaseNotifications extends ReactContextBaseJavaModule implemen
     WritableArray array = Arguments.createArray();
     for (Bundle bundle : bundles) {
       array.pushMap(parseNotificationBundle(bundle));
+    }
+    promise.resolve(array);
+  }
+
+  @ReactMethod
+  public void getDeliveredNotifications(Promise promise) {
+    ArrayList<StatusBarNotification> bundles = notificationManager.getActiveNotifications();
+    WritableArray array = Arguments.createArray();
+    for (StatusBarNotification bundle : bundles) {
+      array.pushMap(parseStatusBarNotification(bundle));
     }
     promise.resolve(array);
   }
@@ -410,6 +422,24 @@ public class RNFirebaseNotifications extends ReactContextBaseJavaModule implemen
     }
     notificationMap.putMap("android", androidMap);
 
+    return notificationMap;
+  }
+
+  private WritableMap parseStatusBarNotification(StatusBarNotification sb) {
+    WritableMap notificationMap = Arguments.createMap();
+    Notification notification = sb.getNotification();
+    Bundle extras = notification.extras;
+    for (String key : extras.keySet()) {
+      if (key.equals("google.message_id")) {
+        notificationMap.putString("notificationId", extras.getString(key));
+      } else if (key.equals("android.text")) {
+        notificationMap.putString("body", extras.getString(key));
+      } else if (key.equals("android.title")) {
+        notificationMap.putString("title", extras.getString(key));
+      }
+    }
+
+    notificationMap.putString("notificationId", sb.getTag());
     return notificationMap;
   }
 

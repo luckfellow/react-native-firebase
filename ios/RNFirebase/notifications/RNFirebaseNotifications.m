@@ -119,9 +119,11 @@ RCT_EXPORT_METHOD(complete:(NSString*)handlerKey fetchResult:(UIBackgroundFetchR
 // Listen for background messages
 - (void)didReceiveRemoteNotification:(NSDictionary *)userInfo
               fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    DLog("MyNotifPipeline Lib | didReceiveRemoteNotification");
     // FCM Data messages come through here if they specify content-available=true
     // Pass them over to the RNFirebaseMessaging handler instead
     if (userInfo[@"aps"] && ((NSDictionary*)userInfo[@"aps"]).count == 1 && userInfo[@"aps"][@"content-available"]) {
+        DLog("MyNotifPipeline Lib | didReceiveRemoteNotification content-available TRUE, pass over to RNFirebaseMessaging");
         [[RNFirebaseMessaging instance] didReceiveRemoteNotification:userInfo];
         completionHandler(UIBackgroundFetchResultNoData);
         return;
@@ -396,6 +398,44 @@ RCT_EXPORT_METHOD(scheduleNotification:(NSDictionary*) notification
             }];
         }
     }
+}
+
+- (NSDictionary*) parseDeliveredUNNotification:(UNNotification *) notification NS_AVAILABLE_IOS(10_0) {
+    NSDictionary *request = [self parseUNNotificationRequest:notification.request];
+    NSMutableDictionary *formattedNotification = [[NSMutableDictionary alloc] init];
+
+    formattedNotification = [request mutableCopy];
+
+    if (notification.date) {
+        NSTimeInterval seconds = notification.date.timeIntervalSince1970;
+        double milliseconds = seconds * 1000;
+        formattedNotification[@"date"] = [NSNumber numberWithDouble:milliseconds];
+    }
+
+    return formattedNotification;
+}
+
+RCT_EXPORT_METHOD(getDeliveredNotifications:(RCTPromiseResolveBlock)resolve
+                                    rejecter:(RCTPromiseRejectBlock)reject){
+ if ([UNUserNotificationCenter class]) {
+     if (@available(iOS 10.0, *)) {
+         UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+
+   [center getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> *_Nonnull notifications) {
+     NSMutableArray<NSDictionary *> *formattedNotifications = [NSMutableArray new];
+
+     for (UNNotification *notification in notifications) {
+        NSDictionary *parsedNotification = [self parseDeliveredUNNotification:notification];
+
+       [formattedNotifications addObject:parsedNotification];
+     }
+     resolve(formattedNotifications);
+   }];
+     } else {
+         // Fallback on earlier versions
+          resolve(@[]);
+     }
+ }
 }
 
 RCT_EXPORT_METHOD(setBadge:(NSInteger) number

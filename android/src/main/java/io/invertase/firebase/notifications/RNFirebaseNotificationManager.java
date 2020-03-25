@@ -259,6 +259,22 @@ class RNFirebaseNotificationManager {
     return array;
   }
 
+  ArrayList<StatusBarNotification> getActiveNotifications() {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+      ArrayList<StatusBarNotification> array = new ArrayList<>();
+
+      StatusBarNotification[] statusBarNotifications = notificationManager.getActiveNotifications();
+
+      for (StatusBarNotification statusBarNotification : statusBarNotifications) {
+        array.add(statusBarNotification);
+      }
+
+      return array;
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
   void removeAllDeliveredNotifications(Promise promise) {
     notificationManager.cancelAll();
     promise.resolve(null);
