@@ -21,6 +21,7 @@ export default class Notification {
       this._sound = nativeNotification.sound;
       this._subtitle = nativeNotification.subtitle;
       this._title = nativeNotification.title;
+      this._from = nativeNotification.from;
     }
 
     this._android = new AndroidNotification(this, nativeNotification && nativeNotification.android);
@@ -61,6 +62,10 @@ export default class Notification {
 
   get title() {
     return this._title;
+  }
+
+  get from() {
+    return this._from;
   }
   /**
    *
@@ -132,6 +137,17 @@ export default class Notification {
     this._title = title;
     return this;
   }
+  /**
+   *
+   * @param from
+   * @returns {Notification}
+   */
+
+
+  setFrom(from) {
+    this._from = from;
+    return this;
+  }
 
   build() {
     if (!this._notificationId) {
@@ -146,7 +162,8 @@ export default class Notification {
       notificationId: this._notificationId,
       sound: this._sound,
       subtitle: this._subtitle,
-      title: this._title
+      title: this._title,
+      from: this._from
     };
   }
 

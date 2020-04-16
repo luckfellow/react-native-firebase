@@ -38,6 +38,8 @@ export default class Notification {
   // N/A | subtitle | subText
   _title: string; // alertTitle | title | contentTitle
 
+  _from: string;
+
   constructor(
     nativeNotification?: NativeNotification,
     notifications?: Notifications
@@ -49,6 +51,7 @@ export default class Notification {
       this._sound = nativeNotification.sound;
       this._subtitle = nativeNotification.subtitle;
       this._title = nativeNotification.title;
+      this._from = nativeNotification.from;
     }
 
     this._android = new AndroidNotification(
@@ -98,6 +101,10 @@ export default class Notification {
 
   get title(): string {
     return this._title;
+  }
+
+  get from(): string {
+    return this._from;
   }
 
   /**
@@ -165,6 +172,16 @@ export default class Notification {
     return this;
   }
 
+  /**
+   *
+   * @param from
+   * @returns {Notification}
+   */
+  setFrom(from: string): Notification {
+    this._from = from;
+    return this;
+  }
+
   build(): NativeNotification {
     if (!this._notificationId) {
       throw new Error(
@@ -181,6 +198,7 @@ export default class Notification {
       sound: this._sound,
       subtitle: this._subtitle,
       title: this._title,
+      from: this._from,
     };
   }
 }

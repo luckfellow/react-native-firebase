@@ -391,6 +391,9 @@ public class RNFirebaseNotifications extends ReactContextBaseJavaModule implemen
     if (title != null) {
       notificationMap.putString("title", title);
     }
+    if(message.getFrom() != null) {
+      notificationMap.putString("from", message.getFrom());
+    }
 
     // Android specific notification properties
     WritableMap androidMap = Arguments.createMap();
