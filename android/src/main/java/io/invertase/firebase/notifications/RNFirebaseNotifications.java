@@ -339,8 +339,10 @@ public class RNFirebaseNotifications extends ReactContextBaseJavaModule implemen
     for (String key : extras.keySet()) {
       if (key.equals("google.message_id")) {
         notificationMap.putString("notificationId", extras.getString(key));
-      } else if (key.equals("collapse_key")
-        || key.equals("from")
+      } else if(key.equals("from")) {
+        notificationMap.putString("from", extras.getString(key));
+      }  else if (key.equals("collapse_key")
+        //|| key.equals("from")
         || key.equals("google.sent_time")
         || key.equals("google.ttl")
         || key.equals("_fbSourceApplicationHasBeenSet")) {
